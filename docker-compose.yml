@@ -1,0 +1,61 @@
+x-app: &app
+  build:
+    context: ./
+    dockerfile: Dockerfile-dev
+    args:
+      NODE_MAJOR: "20"
+
+services:
+  web:
+    <<: *app
+    environment:
+      VITE_RUBY_HOST: vite
+    depends_on:
+      - vite
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app
+    networks:
+      - notatochips
+    command: rails s -b 0.0.0.0
+
+  vite:
+    <<: *app
+    environment:
+      DEBUG: "*vite*"
+      RAILS_ENV: development
+      VITE_RUBY_HOST: 0.0.0.0
+      VIRTUAL_HOST: "localhost"
+      VIRTUAL_PATH: "/vite-dev"
+      VIRTUAL_PORT: "3036"
+    volumes:
+      - .:/app
+    networks:
+      - notatochips
+    expose:
+      - "3036"
+    ports:
+      - "3036:3036"
+    command: bin/vite dev
+
+  mailpit:
+    image: axllent/mailpit
+    container_name: mailpit
+    restart: unless-stopped
+    volumes:
+      - ./data:/data
+    networks:
+      - notatochips
+    ports:
+      - 8025:8025
+      - 1025:1025
+    environment:
+      MP_MAX_MESSAGES: 5000
+      MP_DATABASE: /data/mailpit.db
+      MP_SMTP_AUTH_ACCEPT_ANY: 1
+      MP_SMTP_AUTH_ALLOW_INSECURE: 1
+
+networks:
+  notatochips:
+    external: true

@@ -1,0 +1,14 @@
+en:
+  validation:
+    rules:
+      email: Email address
+      password: Password
+      password_confirmation: Password confirmation
+    errors:
+      rules:
+        email:
+          taken: already taken.
+        password:
+          short_password: must be at least 12 characters long.
+        password_confirmation:
+          does_not_match: must match the password.
